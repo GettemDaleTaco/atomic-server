@@ -31,6 +31,7 @@ tauri-plugin-process = "2"
 # Android with EACCES; this is the supported one, and it is what an <a
 # target="_blank"> ultimately needs in a webview with nowhere to put a tab.
 tauri-plugin-opener = "2"
+tauri-plugin-notification = "2"
 tokio = { version = "1", features = ["rt", "sync", "time"] }
 
 # Mobile-only: the in-app QR scanner for device pairing. The Android WebView
