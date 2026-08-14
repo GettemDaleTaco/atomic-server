@@ -31,6 +31,7 @@ import { useRights } from '../../routes/Share/useRights';
 import { AgentRights } from '../../routes/Share/AgentRights';
 import { useInheritedRights } from '../../routes/Share/useInheritedRights';
 import { PermissionRow } from '../../routes/Share/PermissionRow';
+import { RequestAccessButton } from '../RequestAccessButton';
 import styled from 'styled-components';
 
 export interface ShareDialogProps {
@@ -116,6 +117,7 @@ export function ShareDialog({
                       Create Invite
                     </Button>
                   )}
+                  {!canWrite && <RequestAccessButton resource={resource} />}
                 </Row>
                 <RightsCard>
                   <Column>
