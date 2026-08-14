@@ -45,6 +45,9 @@
       "signingIdentity": null,
       "entitlements": null
     },
+    "iOS": {
+      "minimumSystemVersion": "15.0"
+    },
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
