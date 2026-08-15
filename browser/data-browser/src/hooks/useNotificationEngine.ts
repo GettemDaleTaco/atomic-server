@@ -52,8 +52,18 @@ export function NotificationEngineProvider({
         return;
       }
 
-      const personalDrive =
-        (await fetchPersonalDriveSubject(store, agent)) ?? knownPersonalDrive;
+      let personalDrive: string | undefined;
+
+      for (let attempt = 0; attempt < 8 && !cancelled; attempt++) {
+        personalDrive =
+          (await fetchPersonalDriveSubject(store, agent)) ?? knownPersonalDrive;
+
+        if (personalDrive) {
+          break;
+        }
+
+        await new Promise(r => setTimeout(r, 250));
+      }
 
       if (!personalDrive || cancelled) {
         setEngine(null);

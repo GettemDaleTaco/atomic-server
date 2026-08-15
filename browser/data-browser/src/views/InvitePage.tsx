@@ -213,12 +213,37 @@ function InvitePage({ resource }: ResourcePageProps): JSX.Element {
     return personalDriveSubject;
   };
 
+  const pinPersonalDriveOnAgent = (personalDrive: string) => {
+    if (agentSecret) {
+      try {
+        const parsed = JSON.parse(atob(agentSecret)) as {
+          privateKey: string;
+          subject: string;
+        };
+        const nextAgent = Agent.fromSecret(
+          Agent.buildSecret(parsed.privateKey, parsed.subject, personalDrive),
+          'js',
+        );
+        store.setAgent(nextAgent);
+        setAgent(nextAgent);
+      } catch {
+        if (agent) {
+          agent.initialDrive = personalDrive;
+        }
+      }
+    } else if (agent) {
+      agent.initialDrive = personalDrive;
+    }
+
+    setDrive(personalDrive);
+  };
+
   const [dialogProps, show, hide] = useDialog({
     onSuccess: async () => {
-      setAgentSecret(undefined);
       const agentSubject = agent?.subject;
 
       if (!agentSubject) {
+        setAgentSecret(undefined);
         goToRedirect();
 
         return;
@@ -233,16 +258,13 @@ function InvitePage({ resource }: ResourcePageProps): JSX.Element {
       // Point the sidebar at the new personal drive. Without this, the
       // default `drive` in AppSettings is still `baseURL` (or whatever was
       // active pre-invite) and the sidebar shows that instead.
-      // Also pin `initialDrive` so the notification engine / inbox fallback
-      // is the private drive, not the invite destination.
+      // Rebuild the Agent so `initialDrive` is Personal — the notification
+      // engine remounts and writes inbox rows there, not on the invite target.
       if (personalDrive) {
-        if (agent) {
-          agent.initialDrive = personalDrive;
-        }
-
-        setDrive(personalDrive);
+        pinPersonalDriveOnAgent(personalDrive);
       }
 
+      setAgentSecret(undefined);
       goToRedirect();
     },
   });
@@ -342,11 +364,7 @@ function InvitePage({ resource }: ResourcePageProps): JSX.Element {
         );
 
         if (personalDrive) {
-          if (agent) {
-            agent.initialDrive = personalDrive;
-          }
-
-          setDrive(personalDrive);
+          pinPersonalDriveOnAgent(personalDrive);
         }
 
         goToRedirect(destination);
