@@ -90,14 +90,14 @@ export function useDevDrive() {
         personal: false,
       });
 
-      // Secret `initialDrive` is the workspace. Second-context e2e signs
-      // in with this secret and then opens a subject on Dev drive; putting
-      // Personal here made `usePersonalDrive` / driveStorage treat the
-      // workspace as foreign. Agent.personalDrive is still Personal.
+      // Secret `initialDrive` is Personal. The engine and inbox fall back
+      // to this when the Agent resource is not yet fetched; pointing it at
+      // the workspace wrote NotificationItems onto Dev drive while the UI
+      // queried Personal. Agent.personalDrive is set by createDrive above.
       const finalSecret = Agent.buildSecret(
         agentKeys.privateKey,
         agentDID,
-        driveResource.subject,
+        personalDriveResource.subject,
       );
 
       // Expose for E2E tests so they can sign in as the same agent on other pages.

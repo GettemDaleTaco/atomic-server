@@ -233,7 +233,13 @@ function InvitePage({ resource }: ResourcePageProps): JSX.Element {
       // Point the sidebar at the new personal drive. Without this, the
       // default `drive` in AppSettings is still `baseURL` (or whatever was
       // active pre-invite) and the sidebar shows that instead.
+      // Also pin `initialDrive` so the notification engine / inbox fallback
+      // is the private drive, not the invite destination.
       if (personalDrive) {
+        if (agent) {
+          agent.initialDrive = personalDrive;
+        }
+
         setDrive(personalDrive);
       }
 
@@ -336,6 +342,10 @@ function InvitePage({ resource }: ResourcePageProps): JSX.Element {
         );
 
         if (personalDrive) {
+          if (agent) {
+            agent.initialDrive = personalDrive;
+          }
+
           setDrive(personalDrive);
         }
 
