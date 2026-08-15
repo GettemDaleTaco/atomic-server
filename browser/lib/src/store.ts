@@ -275,6 +275,11 @@ export interface CreateDriveOpts {
    *  itself). A non-personal (additional) drive is instead pushed onto the
    *  agent's EXISTING personal drive's list. Defaults to true. */
   personal?: boolean;
+  /** Skip the default Ontology resource. Used by `/app/dev-drive` for the
+   *  private inbox drive — e2e never creates tables there, and the extra
+   *  save is the difference between `before()` fitting in the 60s budget
+   *  and blowing it. */
+  skipDefaultOntology?: boolean;
 }
 
 /**
@@ -2171,7 +2176,13 @@ export class Store {
     name: string,
     opts: CreateDriveOpts = {},
   ): Promise<Resource> {
-    const { description, subdomain, agentName, personal = true } = opts;
+    const {
+      description,
+      subdomain,
+      agentName,
+      personal = true,
+      skipDefaultOntology = false,
+    } = opts;
     const agent = this.getAgent();
 
     if (!agent?.subject) {
@@ -2212,7 +2223,9 @@ export class Store {
     // Every drive gets a default Ontology: the home for classes and
     // properties created inside the drive (e.g. table Row classes), so they
     // don't pile up directly under the drive itself.
-    await this.createDefaultOntology(drive);
+    if (!skipDefaultOntology) {
+      await this.createDefaultOntology(drive);
+    }
 
     return drive;
   }
