@@ -20,6 +20,31 @@ export const SERVER_URL = process.env.SERVER_URL || 'http://localhost:9883';
 export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:6747';
 
 /**
+ * Rewrite a server-origin `/app/...` URL (invite links, copied share URLs)
+ * onto {@link FRONTEND_URL}. No-op in CI where both origins match.
+ * Opening `http://localhost:9885/app/invite` locally hits the Rust-served
+ * SPA, which is a different origin than Vite and often a stale bundle —
+ * the invitee then never gets `__notificationEngine`.
+ */
+export function appUrlOnFrontend(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const front = new URL(FRONTEND_URL);
+
+    if (!parsed.pathname.startsWith('/app/')) {
+      return url;
+    }
+
+    parsed.protocol = front.protocol;
+    parsed.host = front.host;
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
+/**
  * Hostname the Node test process can actually reach.
  *
  * Dagger serves the SPA at `http://atomic.localhost:9883` so Chromium treats
