@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { before, getDevDriveSecret, signIn, FRONTEND_URL } from './test-utils';
+import { before, getDevDriveSecret, openDrive, signIn, FRONTEND_URL } from './test-utils';
 
 /**
  * A second device (or a fresh/cleared OPFS) must load an existing drive's
@@ -56,9 +56,7 @@ test('a fresh-OPFS second device loads an existing drive’s contents', async ({
   const p2 = await ctx2.newPage();
   await p2.goto(FRONTEND_URL);
   await signIn(p2, secret);
-  await p2.goto(
-    `${FRONTEND_URL}/app/show?subject=${encodeURIComponent(drive)}`,
-  );
+  await openDrive(p2, drive);
 
   await expect(p2.getByText('SecondDeviceChild').first()).toBeVisible({
     timeout: 30000,
