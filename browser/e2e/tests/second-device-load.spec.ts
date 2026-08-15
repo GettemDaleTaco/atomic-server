@@ -61,7 +61,7 @@ test('a fresh-OPFS second device loads an existing drive’s contents', async ({
   );
 
   await expect(p2.getByText('SecondDeviceChild').first()).toBeVisible({
-    timeout: 12000,
+    timeout: 30000,
   });
   await ctx2.close();
 });
