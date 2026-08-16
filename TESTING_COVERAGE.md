@@ -38,6 +38,7 @@ A flow is only genuinely safe when all three are covered.
 | Browser e2e (playwright) | `cd browser/e2e && pnpm run test-e2e` | `endToEnd` |
 | Flutter Dart | `cd flutter && flutter test` | `flutterTest` |
 | Flutter Rust bridge | `cargo test --manifest-path flutter/rust/Cargo.toml` | `flutterTest` |
+| Python SDK | `cd python && maturin develop && pytest` | **not in CI** |
 
 CI runs `cargo nextest run --workspace --exclude atomic-server-tauri
 --no-default-features --features light`. Feature unification pulls in
@@ -48,6 +49,8 @@ Two things worth knowing about the runners:
 - **`flutter/rust` is excluded from the workspace** (root `Cargo.toml`), so
   `--workspace` never compiles it. It is covered only by the explicit
   `--manifest-path` step in `flutterTest`.
+- **`python/` is excluded from the workspace** for the same reason (PyO3).
+  Tests are `pytest` after `maturin develop`; they are not in Dagger CI yet.
 - **`.config/nextest.toml` sets `retries = 2`.** A flaky test passes CI
   silently. Check for `FLAKY` in nextest output, not just the summary line.
 
@@ -181,6 +184,10 @@ nothing to test yet. Listed so it is not mistaken for covered.
 ### 7. Flutter integration_test is effectively dead
 
 One 13-line smoke test, never run in CI — the pipeline has no emulator.
+
+### 7b. Python SDK (`python/`)
+
+Glue only: `pytest` after `maturin develop` covers in-memory create/read/update/query/delete and file-backed reopen. Not in Dagger CI. No sync, blobs, or HTTP.
 
 ### 8. Known residual races
 
