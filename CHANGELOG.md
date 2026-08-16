@@ -7,6 +7,8 @@ See [STATUS.md](server/STATUS.md) to learn more about which features will remain
 
 ## UNRELEASED
 
+- **Python SDK** (`python/`, import `atomic_data`): local-first bindings over `atomic_lib` via PyO3. `Store.open` / `in_memory`, setup, create/read/update/query/delete, file-backed reopen. No server required. Sync and PyPI are not in this first cut.
+
 ## [v0.41.0-beta.2] - 2026-08-01
 
 **This is the local-first release.** Atomic Data no longer needs a server to exist.
