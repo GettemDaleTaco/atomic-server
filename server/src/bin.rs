@@ -12,6 +12,7 @@ mod helpers;
 #[cfg(feature = "https")]
 mod https;
 mod jsonerrors;
+mod log_frames;
 #[cfg(feature = "process-management")]
 mod process;
 mod routes;

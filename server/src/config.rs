@@ -92,6 +92,10 @@ pub struct Opts {
     /// How you want to trace what's going on with the server. Useful for monitoring performance and errors in production.
     #[clap(arg_enum, long, env = "ATOMIC_TRACING", default_value = "stdout")]
     pub trace: Tracing,
+
+    /// Optional directory where received blip / pip frames are stored in files by payload format.
+    #[clap(long, env = "ATOMIC_LOG_FRAMES_DIR")]
+    pub log_frames_dir: Option<PathBuf>,
 }
 
 #[derive(clap::ArgEnum, Clone, Debug)]
@@ -180,6 +184,8 @@ pub struct Config {
     pub uploads_path: PathBuf,
     /// Path to where the search index for tantivy full text search is located  (defaults to `~/.config/atomic/search_index`)
     pub search_index_path: PathBuf,
+    /// Path where received frame logs are stored, grouped by frame kind and payload format.
+    pub log_frames_path: Option<PathBuf>,
     /// If true, the initialization scripts will be ran (create first Drive, Agent, indexing, etc)
     pub initialize: bool,
 }
@@ -237,6 +243,7 @@ pub fn build_config(opts: Opts) -> AtomicServerResult<Config> {
 
     let mut search_index_path = cache_dir.to_owned();
     search_index_path.push("search_index");
+    let log_frames_path = opts.log_frames_dir.clone();
 
     // Make sure to also edit the `default.env` if you introduce / change environment variables here.
     for (key, value) in env::vars() {
@@ -295,5 +302,6 @@ pub fn build_config(opts: Opts) -> AtomicServerResult<Config> {
         store_path,
         search_index_path,
         uploads_path,
+        log_frames_path,
     })
 }

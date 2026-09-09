@@ -23,6 +23,7 @@ pub struct AppState {
     /// The Actix Address of the CommitMonitor, which should receive updates when a commit is applied
     pub commit_monitor: actix::Addr<CommitMonitor>,
     pub search_state: SearchState,
+    pub frame_logger: Option<crate::log_frames::FrameLogger>,
 }
 
 /// Creates the AppState (the server's context available in Handlers).
@@ -78,6 +79,10 @@ pub fn init(config: Config) -> AtomicServerResult<AppState> {
     );
 
     let commit_monitor_clone = commit_monitor.clone();
+    let frame_logger = config
+        .log_frames_path
+        .clone()
+        .map(crate::log_frames::FrameLogger::new);
 
     // This closure is called every time a Commit is created
     let send_commit = move |commit_response: &CommitResponse| {
@@ -92,6 +97,7 @@ pub fn init(config: Config) -> AtomicServerResult<AppState> {
         config,
         commit_monitor,
         search_state,
+        frame_logger,
     })
 }
 

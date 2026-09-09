@@ -11,6 +11,14 @@ pub async fn post_commit(
 ) -> AtomicServerResult<HttpResponse> {
     let store = &appstate.store;
     let mut builder = HttpResponse::Ok();
+    if let Some(frame_logger) = &appstate.frame_logger {
+        frame_logger.log_text(
+            crate::log_frames::FrameKind::Pip,
+            "http-commit",
+            crate::log_frames::FrameFormat::JsonAd,
+            &body,
+        )?;
+    }
     let incoming_commit_resource = parse_json_ad_commit_resource(&body, store)?;
     let incoming_commit = Commit::from_resource(incoming_commit_resource)?;
     if !incoming_commit.subject.contains(

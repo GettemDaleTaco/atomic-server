@@ -24,7 +24,11 @@ pub async fn web_socket_handler(
     tracing::debug!("Starting websocket for {}", for_agent);
 
     let result = ws::start(
-        WebSocketConnection::new(appstate.commit_monitor.clone(), for_agent),
+        WebSocketConnection::new(
+            appstate.commit_monitor.clone(),
+            for_agent,
+            appstate.frame_logger.clone(),
+        ),
         &req,
         stream,
     )?;
@@ -48,6 +52,7 @@ pub struct WebSocketConnection {
     /// The Agent who is connected.
     /// If it's not specified, it's the Public Agent.
     agent: String,
+    frame_logger: Option<crate::log_frames::FrameLogger>,
 }
 
 impl Actor for WebSocketConnection {
@@ -72,6 +77,16 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WebSocketConnecti
             Ok(ws::Message::Text(bytes)) => {
                 let text = bytes.to_string();
                 tracing::debug!("Incoming websocket text message: {:?}", text);
+                if let Some(frame_logger) = &self.frame_logger {
+                    if let Err(err) = frame_logger.log_text(
+                        crate::log_frames::FrameKind::Blip,
+                        "websocket-text",
+                        crate::log_frames::FrameFormat::Text,
+                        &text,
+                    ) {
+                        tracing::warn!("Failed to log websocket text frame: {}", err);
+                    }
+                }
                 match text.as_str() {
                     s if s.starts_with("SUBSCRIBE ") => {
                         let mut parts = s.split("SUBSCRIBE ");
@@ -107,7 +122,19 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WebSocketConnecti
                     }
                 };
             }
-            Ok(ws::Message::Binary(_bin)) => ctx.text("ERROR: Binary not supported"),
+            Ok(ws::Message::Binary(bin)) => {
+                if let Some(frame_logger) = &self.frame_logger {
+                    if let Err(err) = frame_logger.log_bytes(
+                        crate::log_frames::FrameKind::Pip,
+                        "websocket-binary",
+                        crate::log_frames::FrameFormat::Binary,
+                        bin.as_ref(),
+                    ) {
+                        tracing::warn!("Failed to log websocket binary frame: {}", err);
+                    }
+                }
+                ctx.text("ERROR: Binary not supported")
+            }
             Ok(ws::Message::Close(reason)) => {
                 ctx.close(reason);
                 ctx.stop();
@@ -118,13 +145,18 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WebSocketConnecti
 }
 
 impl WebSocketConnection {
-    fn new(commit_monitor_addr: Addr<CommitMonitor>, agent: String) -> Self {
+    fn new(
+        commit_monitor_addr: Addr<CommitMonitor>,
+        agent: String,
+        frame_logger: Option<crate::log_frames::FrameLogger>,
+    ) -> Self {
         Self {
             hb: Instant::now(),
             // Maybe this should be stored only in the CommitMonitor, and not here.
             subscribed: std::collections::HashSet::new(),
             commit_monitor_addr,
             agent,
+            frame_logger,
         }
     }
 

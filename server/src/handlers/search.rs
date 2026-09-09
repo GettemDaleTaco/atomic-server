@@ -199,6 +199,14 @@ pub async fn search_index_rdf(
     appstate: web::Data<AppState>,
     body: String,
 ) -> AtomicServerResult<HttpResponse> {
+    if let Some(frame_logger) = &appstate.frame_logger {
+        frame_logger.log_text(
+            crate::log_frames::FrameKind::Pip,
+            "http-search-rdf",
+            crate::log_frames::FrameFormat::Turtle,
+            &body,
+        )?;
+    }
     // Parse Turtle
     use rio_api::parser::TriplesParser;
     use rio_turtle::{TurtleError, TurtleParser};
