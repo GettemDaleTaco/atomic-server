@@ -111,7 +111,12 @@ mod tests {
         let logger = FrameLogger::new(test_dir.clone());
 
         let path = logger
-            .log_text(FrameKind::Blip, "ws:text", FrameFormat::Text, "SUBSCRIBE /test")
+            .log_text(
+                FrameKind::Blip,
+                "ws:text",
+                FrameFormat::Text,
+                "SUBSCRIBE /test",
+            )
             .unwrap();
 
         assert!(path.starts_with(&test_dir));
@@ -130,12 +135,7 @@ mod tests {
 
         let payload = [0_u8, 159, 146, 150];
         let path = logger
-            .log_bytes(
-                FrameKind::Pip,
-                "ws-binary",
-                FrameFormat::Binary,
-                &payload,
-            )
+            .log_bytes(FrameKind::Pip, "ws-binary", FrameFormat::Binary, &payload)
             .unwrap();
 
         assert!(path.extension().unwrap() == "bin");
