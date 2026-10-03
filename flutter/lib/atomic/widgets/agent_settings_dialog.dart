@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../atomic_client.dart';
 import '../session.dart';
 import '../../screens/pair_screen.dart';
 import '../../widgets/error_snack.dart';
+import 'command_window_dialog.dart';
+import 'command_window_service.dart';
 import 'server_settings_section.dart';
 
 class AgentSettingsDialog extends StatefulWidget {
@@ -190,6 +193,11 @@ class _AgentSettingsDialogState extends State<AgentSettingsDialog> {
 
                     // ── Identity ──
                     _buildIdentitySection(theme),
+
+                    const Divider(height: 32),
+
+                    // ── Command window ──
+                    _buildCommandWindowSection(theme),
 
                     const Divider(height: 32),
 
@@ -389,6 +397,83 @@ class _AgentSettingsDialogState extends State<AgentSettingsDialog> {
               style: TextStyle(
                   fontSize: 13,
                   color: Theme.of(context).colorScheme.onSurfaceVariant)),
+      ],
+    );
+  }
+
+  // ── Command Window Section ────────────────────────────────────────────
+
+  Future<void> _openCommandWindow() async {
+    final diagnostics = _buildCommandWindowContent();
+    final isLinux =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
+
+    if (isLinux) {
+      final opened = await openSystemCommandWindow();
+      if (opened) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Opened system terminal')),
+          );
+        }
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    await CommandWindowDialog.show(context, diagnostics);
+  }
+
+  String _buildCommandWindowContent() {
+    final did = _agent?.subject ?? 'not available';
+    final drive = _activeDrive ?? 'not available';
+    final peer = _peerId ?? 'not available';
+    final driveName = (_activeDrive != null &&
+            _driveNames[_activeDrive]?.trim().isNotEmpty == true)
+        ? _driveNames[_activeDrive]!.trim()
+        : 'not available';
+
+    return '''
+Atomic Canvas command window
+============================
+agent.did      = $did
+drive.id       = $drive
+drive.name     = $driveName
+device.peer_id = $peer
+
+Commands:
+help
+show agent.did
+show drive.id
+show device.peer_id
+''';
+  }
+
+  Widget _buildCommandWindowSection(ThemeData theme) {
+    final isLinux =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
+    final helperText = isLinux
+        ? 'Opens your Linux terminal.'
+        : 'iOS and other platforms use an in-app command window.';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Command Window'),
+        Text(
+          helperText,
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.terminal, size: 14),
+          label: const Text('Open command window',
+              style: TextStyle(fontSize: 12)),
+          onPressed: _openCommandWindow,
+        ),
       ],
     );
   }
