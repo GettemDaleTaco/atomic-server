@@ -532,6 +532,52 @@ async fn self_signed_agent_commit_keeps_name() {
     );
 }
 
+#[actix_rt::test]
+async fn system_analytics_endpoint_returns_metrics() {
+    let unique_string = atomic_lib::utils::random_string(10);
+    use clap::Parser;
+    let opts = Opts::parse_from([
+        "atomic-server",
+        "--initialize",
+        "--data-dir",
+        &format!("./.temp/{}/db", unique_string),
+        "--config-dir",
+        &format!("./.temp/{}/config", unique_string),
+    ]);
+
+    let mut config = config::build_config(opts)
+        .map_err(|e| format!("Initialization failed: {}", e))
+        .expect("failed init config");
+    config.search_index_path = format!("./.temp/{}/search_index", unique_string).into();
+
+    let appstate = crate::appstate::AppState::init(config.clone())
+        .await
+        .expect("failed init appstate");
+
+    let data = Data::new(appstate.clone());
+    let app = test::init_service(
+        App::new()
+            .app_data(data)
+            .configure(crate::routes::config_routes),
+    )
+    .await;
+
+    let req = TestRequest::get()
+        .uri("/system-analytics")
+        .insert_header(("Accept", "application/json"))
+        .to_request();
+    let resp = test::call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let body = get_body(resp);
+    let parsed: serde_json::Value = serde_json::from_str(&body).expect("valid JSON");
+    assert!(parsed.get("version").is_some());
+    assert!(parsed.get("uptimeSeconds").is_some());
+    assert!(parsed.get("metrics").is_some());
+    assert!(parsed.get("host").is_some());
+    assert!(parsed.get("peers").is_some());
+}
+
 /// Gets the body from the response as a String. Why doen't actix provide this?
 fn get_body(resp: ServiceResponse) -> String {
     let boxbody = resp.into_body();

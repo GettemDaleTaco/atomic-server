@@ -23,6 +23,7 @@ import { LinkOpenRouter } from './LinkOpenRouter';
 import { OnboardingRoute } from './OnboardingRoute';
 import { WelcomeRoute } from './WelcomeRoute';
 import { NewDriveRoute } from './NewDriveRoute';
+import { ScreensaverRoute } from './ScreensaverRoute';
 
 const DevDriveRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -91,6 +92,7 @@ const routeTree = rootRoute.addChildren({
     DemoRoute,
     InviteRoute,
     LinkOpenRouter,
+    ScreensaverRoute,
   }),
   topRoute,
 });

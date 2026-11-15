@@ -11,6 +11,7 @@ import { pathNames, paths } from './paths';
 import { Providers } from '../Providers';
 import { IdentityReconcileGate } from '../components/IdentityReconcileGate';
 import { DeviceLockWatcher } from '../components/DeviceLockWatcher';
+import { IdleScreensaverWatcher } from '../components/IdleScreensaverWatcher';
 import { PairingLinkHandler } from '../components/PairingLinkHandler';
 import { PairingFlowProvider } from '../components/pairing/PairingFlowProvider';
 import ResourcePage from '../views/ResourcePage';
@@ -46,6 +47,8 @@ export const rootRoute = createRootRoute({
         {/* Keeps the device-lock heartbeat alive and enforces idle policies
             while the app is open (no-op unless a policy is set). */}
         <DeviceLockWatcher />
+        {/* Launches /app/screensaver when idle dashboard is enabled. */}
+        <IdleScreensaverWatcher />
       </PairingFlowProvider>
       {/* Uncomment to get Tanstack Router Devtools */}
       {/* <TanStackRouterDevtools position='bottom-right' /> */}

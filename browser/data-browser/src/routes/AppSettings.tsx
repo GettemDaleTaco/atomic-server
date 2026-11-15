@@ -25,7 +25,10 @@ import {
 } from '@components/Settings';
 import { presetColors } from '../styling';
 import { InputStyled, InputWrapper } from '@components/forms/InputStyles';
-import { FaMagnifyingGlass, FaXmark } from 'react-icons/fa6';
+import { FaMagnifyingGlass, FaTv, FaXmark } from 'react-icons/fa6';
+import { useNavigate } from '@tanstack/react-router';
+import { useScreensaverConfig } from '../helpers/useScreensaverConfig';
+import { paths } from './paths';
 
 export const AppSettingsRoute = createRoute({
   path: pathNames.appSettings,
@@ -213,11 +216,97 @@ const AppSettings: React.FunctionComponent = () => {
                 <VirtualDriveSettings />
               </SettingsSection>
             )}
+            <ScreensaverSettingsSection />
             <AISettings />
           </SettingsGroup>
         </SettingsSearchProvider>
       </ContainerNarrow>
     </Main>
+  );
+};
+
+const ScreensaverSettingsSection = () => {
+  const { config, updateConfig, syncedSubject } = useScreensaverConfig();
+  const navigate = useNavigate();
+
+  return (
+    <SettingsSection label='Idle Dashboard & Fire TV Screensaver'>
+      <Column gap='0.85rem'>
+        <CheckboxLabel>
+          <Checkbox
+            checked={config.enabled}
+            onChange={checked => updateConfig({ enabled: checked })}
+          />{' '}
+          Auto-launch idle analytics dashboard when inactive
+        </CheckboxLabel>
+        <CheckboxLabel>
+          <Checkbox
+            checked={config.syncWithDrive}
+            onChange={checked => updateConfig({ syncWithDrive: checked })}
+          />{' '}
+          Sync screensaver settings to Drive (for Fire OS DreamService)
+        </CheckboxLabel>
+        <CheckboxLabel>
+          <Checkbox
+            checked={config.pixelShift}
+            onChange={checked => updateConfig({ pixelShift: checked })}
+          />{' '}
+          Enable OLED / TV burn-in pixel shift
+        </CheckboxLabel>
+        <CheckboxLabel>
+          <Checkbox
+            checked={config.use24HourClock}
+            onChange={checked => updateConfig({ use24HourClock: checked })}
+          />{' '}
+          Use 24-hour clock
+        </CheckboxLabel>
+        <Row gap='1rem' wrapItems>
+          <Column gap='0.35rem'>
+            <SubLabel>Idle timeout</SubLabel>
+            <BasicSelect
+              value={String(config.idleTimeoutSeconds)}
+              onChange={e =>
+                updateConfig({ idleTimeoutSeconds: Number(e.target.value) })
+              }
+            >
+              <option value='30'>30 seconds</option>
+              <option value='60'>1 minute</option>
+              <option value='300'>5 minutes</option>
+              <option value='900'>15 minutes</option>
+              <option value='1800'>30 minutes</option>
+            </BasicSelect>
+          </Column>
+          <Column gap='0.35rem'>
+            <SubLabel>Analytics refresh</SubLabel>
+            <BasicSelect
+              value={String(config.refreshIntervalSeconds)}
+              onChange={e =>
+                updateConfig({
+                  refreshIntervalSeconds: Number(e.target.value),
+                })
+              }
+            >
+              <option value='2'>2 seconds</option>
+              <option value='5'>5 seconds</option>
+              <option value='10'>10 seconds</option>
+              <option value='30'>30 seconds</option>
+            </BasicSelect>
+          </Column>
+        </Row>
+        <Row gap='0.75rem' center wrapItems>
+          <Button
+            type='button'
+            onClick={() => navigate({ to: paths.screensaver })}
+          >
+            <FaTv />
+            Launch Screensaver Now
+          </Button>
+          {syncedSubject && (
+            <SubLabel>Synced to Drive resource ({syncedSubject})</SubLabel>
+          )}
+        </Row>
+      </Column>
+    </SettingsSection>
   );
 };
 

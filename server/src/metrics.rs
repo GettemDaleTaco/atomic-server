@@ -35,7 +35,7 @@ pub fn ws_connected() {
 }
 
 pub fn ws_disconnected() {
-    let _ = WS_CONNECTIONS_ACTIVE.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
+    let _ = WS_CONNECTIONS_ACTIVE.try_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
         Some(v.saturating_sub(1))
     });
 }

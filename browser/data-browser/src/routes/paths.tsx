@@ -28,6 +28,7 @@ export const pathNames = {
   devDrive: '/dev-drive',
   demo: '/demo',
   invite: '/invite',
+  screensaver: '/screensaver',
 } as const;
 export const paths = {
   welcome: `${pathNames.app}${pathNames.welcome}`,
@@ -55,4 +56,5 @@ export const paths = {
   linkOpenRouter: `${pathNames.app}${pathNames.linkOpenRouter}`,
   devDrive: `${pathNames.app}${pathNames.devDrive}`,
   demo: `${pathNames.app}${pathNames.demo}`,
+  screensaver: `${pathNames.app}${pathNames.screensaver}`,
 } as const;
