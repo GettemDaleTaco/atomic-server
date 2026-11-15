@@ -1,6 +1,7 @@
 package io.ontola.atomicserver
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,14 @@ class DreamPrefsBridge(private val context: Context) {
       .putString(AtomicDreamService.KEY_DRIVE, drive)
       .putString(AtomicDreamService.KEY_CONFIG_JSON, configJson)
       .apply()
+  }
+
+  @JavascriptInterface
+  fun wakeDream() {
+    val intent = Intent(AtomicDreamService.ACTION_WAKE_DREAM).apply {
+      setPackage(context.packageName)
+    }
+    context.sendBroadcast(intent)
   }
 }
 

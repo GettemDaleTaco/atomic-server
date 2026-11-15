@@ -301,6 +301,13 @@ const ScreensaverSettingsSection = () => {
             <FaTv />
             Launch Screensaver Now
           </Button>
+          <Button
+            type='button'
+            subtle
+            onClick={() => updateConfig({ wakeRequestedAt: Date.now() })}
+          >
+            Wake Fire TV / Screensaver
+          </Button>
           {syncedSubject && (
             <SubLabel>Synced to Drive resource ({syncedSubject})</SubLabel>
           )}

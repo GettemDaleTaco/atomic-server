@@ -1,9 +1,13 @@
 package io.ontola.atomicserver
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.service.dreams.DreamService
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -22,10 +26,18 @@ class AtomicDreamService : DreamService() {
         const val KEY_SERVER_URL = "server_url"
         const val KEY_DRIVE = "drive"
         const val KEY_CONFIG_JSON = "config_json"
+        const val ACTION_WAKE_DREAM = "io.ontola.atomicserver.WAKE_DREAM"
         private const val DEFAULT_SERVER_URL = "http://localhost:9883"
     }
 
     private var webView: WebView? = null
+    private val wakeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == ACTION_WAKE_DREAM) {
+                finish()
+            }
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onAttachedToWindow() {
@@ -85,9 +97,22 @@ class AtomicDreamService : DreamService() {
         webView = view
         setContentView(view)
         view.loadUrl(targetUri)
+
+        val filter = IntentFilter(ACTION_WAKE_DREAM)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(wakeReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("DEPRECATION")
+            registerReceiver(wakeReceiver, filter)
+        }
     }
 
     override fun onDetachedFromWindow() {
+        try {
+            unregisterReceiver(wakeReceiver)
+        } catch (_: IllegalArgumentException) {
+            // Receiver already unregistered.
+        }
         webView?.let { view ->
             view.stopLoading()
             view.destroy()

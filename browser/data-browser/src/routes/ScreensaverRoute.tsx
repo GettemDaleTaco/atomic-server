@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { createRoute, useNavigate } from '@tanstack/react-router';
 import { styled } from 'styled-components';
 import {
@@ -17,6 +17,7 @@ import {
   fetchSystemAnalytics,
   formatBytes,
   formatUptime,
+  wakeAndroidDream,
   type SystemAnalyticsData,
 } from '../helpers/screensaver';
 import { useScreensaverConfig } from '../helpers/useScreensaverConfig';
@@ -113,28 +114,64 @@ export function ScreensaverPage(): JSX.Element {
     };
   }, [baseURL, effectiveDrive, agent, config.refreshIntervalSeconds]);
 
-  const exitScreensaver = () => {
+  const exitScreensaver = useCallback(() => {
     if (window.history.length > 1) {
       window.history.back();
     } else {
       navigate({ to: '/' });
     }
-  };
+  }, [navigate]);
 
-  // Allow Escape / Backspace to exit when not hosted inside Fire OS DreamService.
+  // Wake on any user interaction (mousemove, mousedown, keydown, touchstart,
+  // wheel) when not hosted inside Fire OS DreamService. A short grace period
+  // prevents the click/keystroke that opened the route from immediately waking.
   useEffect(() => {
     if (isDreamMode) return;
 
-    const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape' || ev.key === 'Backspace') {
-        exitScreensaver();
-      }
+    let armed = false;
+    const armTimer = window.setTimeout(() => {
+      armed = true;
+    }, 500);
+
+    const onWake = () => {
+      if (!armed) return;
+      exitScreensaver();
     };
 
-    window.addEventListener('keydown', onKeyDown);
+    const events = [
+      'mousemove',
+      'mousedown',
+      'keydown',
+      'touchstart',
+      'wheel',
+    ] as const;
 
-    return () => window.removeEventListener('keydown', onKeyDown);
-  });
+    for (const event of events) {
+      window.addEventListener(event, onWake, { passive: true });
+    }
+
+    return () => {
+      window.clearTimeout(armTimer);
+      for (const event of events) {
+        window.removeEventListener(event, onWake);
+      }
+    };
+  }, [isDreamMode, exitScreensaver]);
+
+  // Remote / Drive-synced wake signal: if wakeRequestedAt advances while the
+  // screensaver is open, wake the Fire OS DreamService or exit the route.
+  const initialWakeRef = useRef(config.wakeRequestedAt ?? 0);
+  useEffect(() => {
+    const requested = config.wakeRequestedAt ?? 0;
+    if (requested > initialWakeRef.current) {
+      initialWakeRef.current = requested;
+      if (isDreamMode) {
+        wakeAndroidDream();
+      } else {
+        exitScreensaver();
+      }
+    }
+  }, [config.wakeRequestedAt, isDreamMode, exitScreensaver]);
 
   const shift = PIXEL_OFFSETS[shiftIndex];
   const timeString = now.toLocaleTimeString([], {

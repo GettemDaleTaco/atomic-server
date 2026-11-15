@@ -7,6 +7,7 @@ export interface ScreensaverConfig {
   pixelShift: boolean;
   use24HourClock: boolean;
   syncWithDrive: boolean;
+  wakeRequestedAt?: number;
 }
 
 export const DEFAULT_SCREENSAVER_CONFIG: ScreensaverConfig = {
@@ -69,6 +70,7 @@ declare global {
   interface Window {
     AtomicDreamBridge?: {
       syncConfig: (serverUrl: string, drive: string, configJson: string) => void;
+      wakeDream?: () => void;
     };
   }
 }
@@ -106,6 +108,11 @@ export function parseScreensaverConfig(raw: string | null): ScreensaverConfig {
         typeof parsed.syncWithDrive === 'boolean'
           ? parsed.syncWithDrive
           : DEFAULT_SCREENSAVER_CONFIG.syncWithDrive,
+      wakeRequestedAt:
+        typeof parsed.wakeRequestedAt === 'number' &&
+        Number.isFinite(parsed.wakeRequestedAt)
+          ? parsed.wakeRequestedAt
+          : undefined,
     };
   } catch {
     return DEFAULT_SCREENSAVER_CONFIG;
@@ -177,6 +184,16 @@ export function syncToAndroidDreamBridge(
       drive,
       JSON.stringify(config),
     );
+  } catch {
+    // Non-Android / browser environment — no-op.
+  }
+}
+
+export function wakeAndroidDream(): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.AtomicDreamBridge?.wakeDream?.();
   } catch {
     // Non-Android / browser environment — no-op.
   }

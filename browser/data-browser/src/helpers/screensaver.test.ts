@@ -34,7 +34,15 @@ describe('screensaver helpers', () => {
       pixelShift: false,
       use24HourClock: true,
       syncWithDrive: false,
+      wakeRequestedAt: undefined,
     });
+  });
+
+  it('preserves numeric wakeRequestedAt timestamp', () => {
+    const parsed = parseScreensaverConfig(
+      JSON.stringify({ wakeRequestedAt: 1775504552928 }),
+    );
+    expect(parsed.wakeRequestedAt).toBe(1775504552928);
   });
 
   it('formats bytes cleanly', () => {
