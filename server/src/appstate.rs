@@ -42,6 +42,8 @@ pub struct AppState {
     /// manifest endpoint so the welcome screen can route account creation to the
     /// dashboard.
     pub managed_dashboard_url: Arc<std::sync::RwLock<Option<String>>>,
+    /// Server start instant, used to compute uptime for `/system-analytics`.
+    pub started_at: std::time::Instant,
 }
 
 impl AppState {
@@ -234,6 +236,7 @@ impl AppState {
             index_status_broadcast,
             managed: server_info.managed,
             managed_dashboard_url: server_info.managed_dashboard_url,
+            started_at: std::time::Instant::now(),
         })
     }
 

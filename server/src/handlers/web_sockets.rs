@@ -169,6 +169,7 @@ impl Actor for WebSocketConnection {
     type Context = ws::WebsocketContext<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
+        crate::metrics::ws_connected();
         ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
             if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
                 tracing::info!("Websocket heartbeat failed, disconnecting");
@@ -182,6 +183,7 @@ impl Actor for WebSocketConnection {
     }
 
     fn stopped(&mut self, ctx: &mut Self::Context) {
+        crate::metrics::ws_disconnected();
         // Remove ourselves from every subscription map. Without this,
         // closed connections leave stale `Addr`s in `CommitMonitor` and
         // `LoroSyncBroadcaster`, which every subsequent fanout iterates
