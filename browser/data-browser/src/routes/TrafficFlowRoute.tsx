@@ -71,7 +71,7 @@ const SAMPLE_DATA: TrafficRecord[] = [
 ];
 
 const DEFAULT_PROFILE: Profile = {
-  appName: 'Private Traffic Flow',
+  appName: 'NexusTexas',
   iconUrl: '',
   networkScope: 'Home + VPN',
 };
