@@ -13,6 +13,7 @@ export const paths = {
   about: '/app/about',
   import: '/app/import',
   history: '/app/history',
+  trafficFlow: '/app/traffic-flow',
   allVersions: '/all-versions',
   sandbox: '/sandbox',
   fetchBookmark: '/fetch-bookmark',
