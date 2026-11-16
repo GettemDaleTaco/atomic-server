@@ -1,4 +1,4 @@
-import { FaCog, FaInfo, FaKeyboard, FaUser } from 'react-icons/fa';
+import { FaChartLine, FaCog, FaInfo, FaKeyboard, FaUser } from 'react-icons/fa';
 import React from 'react';
 import { paths } from '../../routes/paths';
 import { SideBarMenuItemProps } from './SideBarMenuItem';
@@ -21,6 +21,12 @@ export const appMenuItems: SideBarMenuItemProps[] = [
     label: 'Keyboard Shortcuts',
     helper: 'View the keyboard shortcuts (?)',
     path: paths.shortcuts,
+  },
+  {
+    icon: <FaChartLine />,
+    label: 'Traffic Flow',
+    helper: 'Private traffic flow dashboard',
+    path: paths.trafficFlow,
   },
   {
     icon: <FaInfo />,
