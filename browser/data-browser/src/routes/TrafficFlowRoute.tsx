@@ -121,7 +121,9 @@ function safeParseRecords(input: string): ParseResult {
 
       if (!valid) {
         throw new Error(
-          `Row ${index + 1} is invalid. Required fields: timestamp, src, dst, protocol, bytes, packets, duration.`,
+          `Row ${
+            index + 1
+          } is invalid. Required fields: timestamp, src, dst, protocol, bytes, packets, duration.`,
         );
       }
 
@@ -176,7 +178,10 @@ function aggregatePairs(records: TrafficRecord[]): PairEntry[] {
     .sort((a, b) => b.bytes - a.bytes);
 }
 
-function totalValue(records: TrafficRecord[], key: 'bytes' | 'packets'): number {
+function totalValue(
+  records: TrafficRecord[],
+  key: 'bytes' | 'packets',
+): number {
   return records.reduce((total, record) => total + record[key], 0);
 }
 
@@ -235,16 +240,24 @@ function loadProfile(): Profile {
 
 export function TrafficFlowRoute(): JSX.Element {
   const [profile, setProfile] = useState<Profile>(loadProfile);
-  const [input, setInput] = useState<string>(JSON.stringify(SAMPLE_DATA, null, 2));
+  const [input, setInput] = useState<string>(
+    JSON.stringify(SAMPLE_DATA, null, 2),
+  );
   const parseResult = useMemo(() => safeParseRecords(input), [input]);
   const records = parseResult.records;
 
-  const topSources = useMemo(() => sumByEndpoint(records, 'src').slice(0, 5), [records]);
+  const topSources = useMemo(
+    () => sumByEndpoint(records, 'src').slice(0, 5),
+    [records],
+  );
   const topDestinations = useMemo(
     () => sumByEndpoint(records, 'dst').slice(0, 5),
     [records],
   );
-  const topFlows = useMemo(() => aggregatePairs(records).slice(0, 8), [records]);
+  const topFlows = useMemo(
+    () => aggregatePairs(records).slice(0, 8),
+    [records],
+  );
   const totalBytes = useMemo(() => totalValue(records, 'bytes'), [records]);
   const totalPackets = useMemo(() => totalValue(records, 'packets'), [records]);
   const totalDuration = useMemo(
