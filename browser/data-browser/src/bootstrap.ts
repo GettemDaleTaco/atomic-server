@@ -1,13 +1,13 @@
 import { core, JSONADParser, type Resource, type Store } from '@tomic/react';
-import baseModels from '@repo-lib-defaults/default_base_models.json';
-import defaultStore from '@repo-lib-defaults/default_store.json';
-import tableDefaults from '@repo-lib-defaults/table.json';
-import dashboardDefaults from '@repo-lib-defaults/dashboard.json';
-import chatroomDefaults from '@repo-lib-defaults/chatroom.json';
-import ontologiesDefaults from '@repo-lib-defaults/ontologies.json';
-import aiDefaults from '@repo-lib-defaults/ai.json';
-import meetingDefaults from '@repo-lib-defaults/meeting.json';
-import forksDefaults from '@repo-lib-defaults/forks.json';
+import baseModels from '@repo-lib-defaults/default_base_models.json' with { type: 'json' };
+import defaultStore from '@repo-lib-defaults/default_store.json' with { type: 'json' };
+import tableDefaults from '@repo-lib-defaults/table.json' with { type: 'json' };
+import dashboardDefaults from '@repo-lib-defaults/dashboard.json' with { type: 'json' };
+import chatroomDefaults from '@repo-lib-defaults/chatroom.json' with { type: 'json' };
+import ontologiesDefaults from '@repo-lib-defaults/ontologies.json' with { type: 'json' };
+import aiDefaults from '@repo-lib-defaults/ai.json' with { type: 'json' };
+import meetingDefaults from '@repo-lib-defaults/meeting.json' with { type: 'json' };
+import forksDefaults from '@repo-lib-defaults/forks.json' with { type: 'json' };
 
 /**
  * A bundled entry that holds no content of its own — no class, and no
